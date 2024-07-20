@@ -1,0 +1,9 @@
+[
+  {
+    "firstName": "FirstNameTest",
+    "lastName": "LastNameTest",
+    "city": "TestCity",
+    "country": "USA",
+    "zipCode": 12345
+  }
+]

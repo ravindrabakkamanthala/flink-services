@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  jobmanager:
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    image: app-flink-jobmanager
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    depends_on:
+      - taskmanager
+      - kafka
+      - postgres
+
+  taskmanager:
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    image: app-flink-taskmanager
+    command: taskmanager
+    scale: 1
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.7.0
+    hostname: localhost
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: "LISTENER_LOCAL://localhost:59092,LISTENER_DOCKER://localhost:29092,PLAINTEXT://localhost:9092"
+      KAFKA_LISTENERS: "LISTENER_LOCAL://0.0.0.0:59092,LISTENER_DOCKER://0.0.0.0:29092,PLAINTEXT://0.0.0.0:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "LISTENER_LOCAL:PLAINTEXT,LISTENER_DOCKER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "LISTENER_DOCKER"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "USER_PROFILE:1:1"
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+
+  postgres:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_db
+

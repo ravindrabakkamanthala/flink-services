@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: flink-service
+
+datasource:
+  jdbcUrl: jdbc:postgresql://0.0.0.0:5432/user_db
+  driverClassName: org.postgresql.Driver
+  username: app
+  password: password
+  idleTimeout: 600000
+  connectionTimeout: 500
+  minimumIdle: 5
+  maximumIdle: 20
+  maximumPoolSize: 20
+  dialect: org.hibernate.dialect.PostgreSQLDialect
+
+kafka:
+  consumer:
+    props:
+      "group.id": "flink-service"
+      "auto.offset.reset": "latest"
+      "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer"
+      "value.deserializer": "io.confluent.kafka.serializers.KafkaAvroDeserializer"
+      "bootstrap.servers": "0.0.0.0:9092"
